@@ -1,22 +1,46 @@
-#include "SpiSlave.h"
+#include <SoftwareSpiSlave_T4.h>
 
-static void BMG250_isr() {
-  byte byte_idx = 0;
-  byte addr = 0;
+constexpr int SS_PIN = 33;
+constexpr int SCK_PIN = 34;
+constexpr int SDI_PIN = 35;
+constexpr int SDO_PIN = 36;
 
-  while (spiSlave->is_ss_asserted(SS_GYRO)) {
-    if (!transaction) {
-      transaction = true;
+static SoftwareSpiSlave spiSlave{};
+
+// forward declaratin of the ISR
+static void slave_isr();
+
+void setup() {
+  // add a slave
+  spiSlave.add(SS_PIN, slave_isr);
+  // start the master, only after having added all the slaves
+  spiSlave.begin(SDI_PIN, SDO_PIN, SCK_PIN);
+
+  Serial.begin(115200);
+}
+
+void loop() {
+  Serial.print("millis: "); Serial.println(millis());
+  delay(1000);
+}
+
+static void slave_isr() {
+  byte rx = 0;
+  byte tx = 0;
+  
+  while (spiSlave.isActive(SS_PIN)) {
+    spiSlave.byteTransaction(&rx, tx, SS_PIN);
+
+    switch (rx) {
+    case 0x10:
+      tx = 0x20;
+      break;
+    case 0x20:
+      tx = 0x40;
+      break;
+    default:
+      tx = 0x00;
+      break;
     }
-
-    if (byte_idx == 0) {
-      spiSlave->byte_transaction(&RxByte[byte_idx], 0, SS_GYRO);
-      // store address, only if it the first byte ended
-      addr = RxByte[byte_idx] & 0x7f;
-    } else {
-      // otherwise reply with the required values
-      spiSlave->byte_transaction(&RxByte[byte_idx], Bmg250_Registers[addr + byte_idx - 1], SS_GYRO);
-    }
-    byte_idx++;
   }
 }
