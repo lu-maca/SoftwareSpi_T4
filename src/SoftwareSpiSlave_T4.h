@@ -1,8 +1,32 @@
+/**
+ * The MIT License (MIT)
+ * 
+ * Copyright (c) 2017 Adafruit Industries
+ * 
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 
 #ifndef SOFTWARESPISLAVE_T4_H
 #define SOFTWARESPISLAVE_T4_H
 #include <Arduino.h>
 
+template <byte CPOL = 0, byte CPHA = 0>
 class SoftwareSpiSlave
 {
  private:
@@ -11,8 +35,22 @@ class SoftwareSpiSlave
   byte sck_pin_;
 
  protected:
-  // return `true` if clock is HIGH
-  inline const bool is_clock_high() const { return (digitalReadFast(sck_pin_) == HIGH); }
+  // return `true` if we shall wait for reading the SDI
+  inline const bool wait_for_read() const { 
+    if constexpr(CPOL == CPHA) {
+      return (digitalReadFast(sck_pin_) == LOW); 
+    } else if constexpr(CPOL != CPHA) {
+      return (digitalReadFast(sck_pin_) == HIGH); 
+    }
+  }
+  // return `true` if we shall wait for writing on the SDO
+  inline const bool wait_for_write() const { 
+    if constexpr(CPOL == CPHA) {
+      return (digitalReadFast(sck_pin_) == HIGH); 
+    } else if constexpr(CPOL != CPHA) {
+      return (digitalReadFast(sck_pin_) == LOW); 
+    }
+  }
   // read `bit_idx`-th bit on SDI line, store it in `rcv` `bit_idx`-th bit; note: bit endianness!
   inline void read_sdi(volatile byte* rcv, const byte bit_idx) const
   {
