@@ -14,7 +14,7 @@ void setup() {
   // add a slave
   spiSlave.add(SS_PIN, slave_isr);
   // start the master, only after having added all the slaves
-  spiSlave.begin(SDI_PIN, SDO_PIN, SCK_PIN);
+  spiSlave.begin(SDI_PIN, SDO_PIN, SCK_PIN, 0, 0);
 
   Serial.begin(115200);
 }
