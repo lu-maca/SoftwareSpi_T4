@@ -26,16 +26,19 @@
 
 SoftwareSpiSlave::SoftwareSpiSlave() {}
 
-void SoftwareSpiSlave::begin(const byte sdi_pin, const byte sdo_pin, const byte sck_pin) {
-  static_assert(CPOL < 2, "CPOL shall be 0 or 1");
-  static_assert(CPHA < 2, "CPHA shall be 0 or 1");
+void SoftwareSpiSlave::begin(const byte sdi_pin, const byte sdo_pin,
+                             const byte sck_pin, const byte cpol,
+                             const byte cpha) {
   sdi_pin_ = sdi_pin;
   sck_pin_ = sck_pin;
   sdo_pin_ = sdo_pin;
+  cpol_ = cpol;
+  cpha_ = cpha;
+
   pinMode(sdi_pin_, INPUT);
   pinMode(sdo_pin_, OUTPUT);
   pinMode(sck_pin_, INPUT);
-  // set interrupts priority on all pins
+
   NVIC_SET_PRIORITY(IRQ_GPIO6789, 0);
 }
 
@@ -44,38 +47,58 @@ void SoftwareSpiSlave::add(const byte ss_pin, void (*isr)(void)) {
   attachInterrupt(digitalPinToInterrupt(ss_pin), isr, FALLING);
 }
 
-void SoftwareSpiSlave::byteTransaction(byte* rx, const byte tx, const int ss_pin) const {
-  for (int bit_idx = 0; bit_idx < 8; bit_idx++) {
-    write_sdo(tx, bit_idx);
-    // wait to be ready to read and checking for ss to be asserted too
-    while (wait_for_read() && isActive(ss_pin) )
-      ;
-    // when clock goes HIGH, read the bit on SDI
-    read_sdi(rx, bit_idx);
-    // wait to be ready to write
-    while (wait_for_write())
-      ;
+bool SoftwareSpiSlave::byteTransaction(byte *rx, const byte tx,
+                                       const int ss_pin) const {
+  static const bool edge1 = (cpha_ == 1);
+  static const bool edge2 = (cpha_ == 0);
+  byte sdi_val = 0;
+
+  // Transfer bits 0–6 with helper
+  for (byte i = 0; i < 7; ++i) {
+    if (!transfer_bit(sdi_val, tx, i, edge1, edge2, ss_pin)) {
+      return false;
+    }
   }
-  // this is needed to reset the SDO line after the last bit of the first byte. If
-  // not, the last bit of the first byte is set as first bit of the second byte, since
-  // the master samples at rising clock and rising clock is checked right after this!
-  write_sdo(0, LOW);
+
+  // Final bit 7 (no second edge)
+  if (!isActive(ss_pin)) {
+    return false;
+  }
+  write_sdo(tx, 7);
+  if (!wait_for_edge(edge1, ss_pin)) {
+    return false;
+  }
+  read_sdi(&sdi_val, 7);
+
+  *rx = sdi_val;
+  write_sdo(LOW, 0); // reset SDO
+  return true;
 }
 
-void SoftwareSpiSlave::byteTransaction(volatile byte* rx, const byte tx, const int ss_pin) const {
-  for (int bit_idx = 0; bit_idx < 8; bit_idx++) {
-    write_sdo(tx, bit_idx);
-     // wait to be ready to read and checking for ss to be asserted too
-     while (wait_for_read() && isActive(ss_pin) )
-      ;
-    // when clock goes HIGH, read the bit on SDI
-    read_sdi(rx, bit_idx);
-    // wait to be ready to write
-    while (wait_for_write())
-      ;
+bool SoftwareSpiSlave::byteTransaction(volatile byte *rx, const byte tx,
+                                       const int ss_pin) const {
+  static const bool edge1 = (cpha_ == 1);
+  static const bool edge2 = (cpha_ == 0);
+  byte sdi_val = 0;
+
+  // Transfer bits 0–6 with helper
+  for (byte i = 0; i < 7; ++i) {
+    if (!transfer_bit(sdi_val, tx, i, edge1, edge2, ss_pin)) {
+      return false;
+    }
   }
-  // this is needed to reset the SDO line after the last bit of the first byte. If
-  // not, the last bit of the first byte is set as first bit of the second byte, since
-  // the master samples at rising clock and rising clock is checked right after this!
-  write_sdo(0, LOW);
+
+  // Final bit 7 (no second edge)
+  if (!isActive(ss_pin)) {
+    return false;
+  }
+  write_sdo(tx, 7);
+  if (!wait_for_edge(edge1, ss_pin)) {
+    return false;
+  }
+  read_sdi(&sdi_val, 7);
+
+  *rx = sdi_val;
+  write_sdo(LOW, 0); // reset SDO
+  return true;
 }
