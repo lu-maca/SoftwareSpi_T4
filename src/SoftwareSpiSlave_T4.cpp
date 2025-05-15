@@ -51,11 +51,10 @@ bool SoftwareSpiSlave::byteTransaction(byte *rx, const byte tx,
                                        const int ss_pin) const {
   static const bool edge1 = (cpha_ == 1);
   static const bool edge2 = (cpha_ == 0);
-  byte sdi_val = 0;
 
   // Transfer bits 0–6 with helper
   for (byte i = 0; i < 7; ++i) {
-    if (!transfer_bit(sdi_val, tx, i, edge1, edge2, ss_pin)) {
+    if (!transfer_bit(rx, tx, i, edge1, edge2, ss_pin)) {
       return false;
     }
   }
@@ -68,9 +67,8 @@ bool SoftwareSpiSlave::byteTransaction(byte *rx, const byte tx,
   if (!wait_for_edge(edge1, ss_pin)) {
     return false;
   }
-  read_sdi(&sdi_val, 7);
+  read_sdi(rx, 7);
 
-  *rx = sdi_val;
   write_sdo(LOW, 0); // reset SDO
   return true;
 }
@@ -79,11 +77,10 @@ bool SoftwareSpiSlave::byteTransaction(volatile byte *rx, const byte tx,
                                        const int ss_pin) const {
   static const bool edge1 = (cpha_ == 1);
   static const bool edge2 = (cpha_ == 0);
-  byte sdi_val = 0;
 
   // Transfer bits 0–6 with helper
   for (byte i = 0; i < 7; ++i) {
-    if (!transfer_bit(sdi_val, tx, i, edge1, edge2, ss_pin)) {
+    if (!transfer_bit(rx, tx, i, edge1, edge2, ss_pin)) {
       return false;
     }
   }
@@ -96,9 +93,8 @@ bool SoftwareSpiSlave::byteTransaction(volatile byte *rx, const byte tx,
   if (!wait_for_edge(edge1, ss_pin)) {
     return false;
   }
-  read_sdi(&sdi_val, 7);
+  read_sdi(rx, 7);
 
-  *rx = sdi_val;
   write_sdo(LOW, 0); // reset SDO
   return true;
 }

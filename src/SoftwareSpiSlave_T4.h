@@ -68,7 +68,7 @@ protected:
     digitalWriteFast(sdo_pin_, bitRead(val, 7 - bit_idx));
   }
 
-  inline bool transfer_bit(byte &sdi_val, const byte tx, const byte bit_idx,
+  inline bool transfer_bit(byte *sdi_val, const byte tx, const byte bit_idx,
                            const bool edge1, const bool edge2,
                            const byte ss_pin) const {
     if (!isActive(ss_pin))
@@ -76,7 +76,7 @@ protected:
     write_sdo(tx, bit_idx);
     if (!wait_for_edge(edge1, ss_pin))
       return false;
-    read_sdi(&sdi_val, bit_idx);
+    read_sdi(sdi_val, bit_idx);
     if (!wait_for_edge(edge2, ss_pin))
       return false;
     return true;
