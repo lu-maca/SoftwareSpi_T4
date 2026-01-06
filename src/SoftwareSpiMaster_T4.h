@@ -9,6 +9,7 @@ class SoftwareSpiMaster
   byte sdi_pin_;
   byte sdo_pin_;
   byte sck_pin_;
+  const uint32_t delay_ns_;
 
  protected:
   // read `bit_idx`-th bit on SDI line, store it in `rcv` `bit_idx`-th bit; note: bit endianness!
@@ -45,7 +46,7 @@ class SoftwareSpiMaster
 
  public:
   // constructor
-  SoftwareSpiMaster();
+  SoftwareSpiMaster(const uint32_t frequency);
   // add device on pin `ss_pin`
   void add(byte ss_pin);
   // begin spi, specify common bus pins (sdi, sdo, sck)
