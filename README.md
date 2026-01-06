@@ -19,3 +19,12 @@ Download the repository and follow the instructions [here](https://docs.arduino.
 # To do
 * add support for other SPI modes
 * add support for other transmission sizes
+
+# SPI Logic
+|  0    |   1   |   2   |   3   |
+|-------|-------|-------|-------|
+| write |       | write |       |
+| clk H | clk H | clk L | clk L |
+| read  | write | read  | write |
+| clk L | clk L | clk H | clk H |
+|       | read  |       | read  |

@@ -9,6 +9,7 @@ class SoftwareSpiSlave
   byte sdi_pin_;
   byte sdo_pin_;
   byte sck_pin_;
+  const byte mode_;
 
  protected:
   // return `true` if clock is HIGH
@@ -31,7 +32,7 @@ class SoftwareSpiSlave
 
  public:
   // constructor
-  SoftwareSpiSlave();
+  SoftwareSpiSlave(const byte cpol, const byte cpha);
   // add slave select on pin `ss_pin`, with handler `isr`
   void add(byte ss_pin, void (*isr)(void));
   // begin spi, call this after adding all slaves
