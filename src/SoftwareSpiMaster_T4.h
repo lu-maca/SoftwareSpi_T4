@@ -27,7 +27,7 @@
 
 #include "SoftwareSpi_T4.h"
 
-class SoftwareSpiMaster
+class SoftwareSpiMaster : public SoftwareSpi
 {
   const uint32_t delay_ns_;
 
