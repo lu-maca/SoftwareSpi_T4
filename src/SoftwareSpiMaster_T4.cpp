@@ -24,7 +24,10 @@
 
 #include "SoftwareSpiMaster_T4.h"
 
-SoftwareSpiMaster::SoftwareSpiMaster() {}
+constexpr uint32_t HALF_NS = 1000000000 / 2;
+
+SoftwareSpiMaster::SoftwareSpiMaster(const uint32_t frequency) : delay_ns_(HALF_NS / frequency) {
+}
 
 void SoftwareSpiMaster::begin(const byte sdi_pin, const byte sdo_pin, const byte sck_pin) {
   sdi_pin_ = sdi_pin;
@@ -45,11 +48,15 @@ void SoftwareSpiMaster::transaction(const int ss_pin, const byte* tx, byte* rx, 
   assert_ss(ss_pin);
   // actual transaction
   for (int byte_idx = 0; byte_idx < transaction_len; byte_idx++) {
-    for (int bit_idx = 0; bit_idx <8; bit_idx++) {
+    for (int bit_idx = 0; bit_idx < 8; bit_idx++) {
       write_sdo(tx[byte_idx], bit_idx);
       rise_sck();
+      // roughly 
+      delayNanoseconds(delay_ns_);
       read_sdi(&rx[byte_idx], bit_idx);
       drop_sck();
+      // roughly
+      delayNanoseconds(delay_ns_);
     }
   }
   // stop transaction
@@ -57,15 +64,19 @@ void SoftwareSpiMaster::transaction(const int ss_pin, const byte* tx, byte* rx, 
 }
 
 void SoftwareSpiMaster::transaction(const int ss_pin, const byte* tx, volatile byte* rx, const int transaction_len) const {
-  // start transaction
+   // start transaction
   assert_ss(ss_pin);
   // actual transaction
   for (int byte_idx = 0; byte_idx < transaction_len; byte_idx++) {
-    for (int bit_idx = 0; bit_idx <8; bit_idx++) {
+    for (int bit_idx = 0; bit_idx < 8; bit_idx++) {
       write_sdo(tx[byte_idx], bit_idx);
       rise_sck();
+      // roughly 
+      delayNanoseconds(delay_ns_);
       read_sdi(&rx[byte_idx], bit_idx);
       drop_sck();
+      // roughly
+      delayNanoseconds(delay_ns_);
     }
   }
   // stop transaction

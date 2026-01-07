@@ -1,46 +1,49 @@
-#include <SoftwareSpiSlave_T4.h>
+#include "SoftwareSpiSlave_T4.h"
 
-constexpr int SS_PIN = 33;
-constexpr int SCK_PIN = 34;
+constexpr int SS_PIN = 36;
+constexpr int SCK_PIN = 33;
 constexpr int SDI_PIN = 35;
-constexpr int SDO_PIN = 36;
+constexpr int SDO_PIN = 34;
 
-static SoftwareSpiSlave spiSlave{};
+static SoftwareSpiSlave spiSlave{SpiMode::_3};
 
 // forward declaratin of the ISR
 static void slave_isr();
 
-void setup() {
-  // add a slave
-  spiSlave.add(SS_PIN, slave_isr);
-  // start the master, only after having added all the slaves
-  spiSlave.begin(SDI_PIN, SDO_PIN, SCK_PIN, 0, 0);
+const byte BUF_LEN = 18;
+uint8_t slave_tx_buf[BUF_LEN] = {
+  0x0, 0x0, 0x0, 0x1, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0xf, 0x80
+};
 
-  Serial.begin(115200);
+uint8_t rx_buf[BUF_LEN];
+
+void setup()
+{
+    Serial.begin(115200);
+    Serial.println("Reboot");
+    // add a slave
+    spiSlave.add(SS_PIN, slave_isr);
+    // start the master, only after having added all the slaves
+    spiSlave.begin(SDI_PIN, SDO_PIN, SCK_PIN);
+    
 }
 
-void loop() {
-  Serial.print("millis: "); Serial.println(millis());
-  delay(1000);
+void loop()
+{
+    delay(1000);
 }
 
 static void slave_isr() {
-  byte rx = 0;
-  byte tx = 0;
-  
+  int i = 0;
   while (spiSlave.isActive(SS_PIN)) {
-    spiSlave.byteTransaction(&rx, tx, SS_PIN);
-
-    switch (rx) {
-    case 0x10:
-      tx = 0x20;
-      break;
-    case 0x20:
-      tx = 0x40;
-      break;
-    default:
-      tx = 0x00;
-      break;
-    }
+    spiSlave.byteTransaction(&rx_buf[i], slave_tx_buf[i], SS_PIN);
+    i++;
   }
+
+  Serial.print("Received: ");
+  for (int j = 0; j < BUF_LEN; j++) {
+    Serial.print(" ");
+    Serial.print(rx_buf[j], HEX);
+  }
+  Serial.println();
 }
