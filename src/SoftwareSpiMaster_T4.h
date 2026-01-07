@@ -24,32 +24,14 @@
 
 #ifndef SOFTWARESPIMASTER_T4_H
 #define SOFTWARESPIMASTER_T4_H
-#include <Arduino.h>
+
+#include "SoftwareSpi_T4.h"
 
 class SoftwareSpiMaster
 {
- private:
-  byte sdi_pin_;
-  byte sdo_pin_;
-  byte sck_pin_;
   const uint32_t delay_ns_;
 
  protected:
-  // read `bit_idx`-th bit on SDI line, store it in `rcv` `bit_idx`-th bit; note: bit endianness!
-  inline void read_sdi(volatile byte* rcv, const byte bit_idx) const
-  {
-    bitWrite(*rcv, 7 - bit_idx, digitalReadFast(sdi_pin_));
-  }
-  // read `bit_idx`-th bit on SDI line, store it in `rcv` `bit_idx`-th bit; note: bit endianness!
-  inline void read_sdi(byte* rcv, const byte bit_idx) const
-  {
-    bitWrite(*rcv, 7 - bit_idx, digitalReadFast(sdi_pin_));
-  }
-  // write `bit_idx`-th bit of `val` on SDO line; note: bit endianness!
-  inline void write_sdo(const byte val, const byte bit_idx) const
-  {
-    digitalWriteFast(sdo_pin_, bitRead(val, 7 - bit_idx));
-  }
   // assert slave select
   inline void assert_ss(const byte ss_pin) const {
     digitalWriteFast(ss_pin, LOW);

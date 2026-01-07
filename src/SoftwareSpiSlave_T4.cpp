@@ -78,8 +78,6 @@ void SoftwareSpiSlave::begin(const byte sdi_pin, const byte sdo_pin, const byte 
   sdi_pin_ = sdi_pin;
   sck_pin_ = sck_pin;
   sdo_pin_ = sdo_pin;
-  cpol_ = cpol;
-  cpha_ = cpha;
 
   pinMode(sdi_pin_, INPUT);
   pinMode(sdo_pin_, OUTPUT);
