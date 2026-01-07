@@ -36,7 +36,7 @@
       while (!is_clock_high() && isActive(ss_pin)) \
         ;                                          \
     }                                              \
-    if (_)                                         \
+    if (mode13_)                                         \
     {                                              \
       read_sdi(rx, bit_idx);                       \
     }                                              \
@@ -44,10 +44,10 @@
 
 SoftwareSpiSlave::SoftwareSpiSlave(const SpiMode mode)
 {
-  const byte mode = static_cast<byte>(mode);
-  mode02_ = (mode == 0 || mode == 2);
-  mode01_ = (mode == 0 || mode == 1);
-  mode13_ = (mode == 1 || mode == 3);
+  const byte mode_ = static_cast<byte>(mode);
+  mode02_ = (mode_ == 0 || mode_ == 2);
+  mode01_ = (mode_ == 0 || mode_ == 1);
+  mode13_ = (mode_ == 1 || mode_ == 3);
 }
 
 void SoftwareSpiSlave::begin(const byte sdi_pin, const byte sdo_pin, const byte sck_pin)

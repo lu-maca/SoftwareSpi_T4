@@ -1,4 +1,3 @@
-#include <SPI.h>
 #include "SoftwareSpiSlave_T4.h"
 
 constexpr int SS_PIN = 36;
@@ -6,14 +5,14 @@ constexpr int SCK_PIN = 33;
 constexpr int SDI_PIN = 35;
 constexpr int SDO_PIN = 34;
 
-static SoftwareSpiSlave spiSlave{SpiMode::_0};
+static SoftwareSpiSlave spiSlave{SpiMode::_3};
 
 // forward declaratin of the ISR
 static void slave_isr();
 
 const byte BUF_LEN = 8;
 uint8_t slave_tx_buf[BUF_LEN] = {
-    0xF0, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08
+    0xF0, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0xF1
 };
 
 uint8_t rx_buf[BUF_LEN];

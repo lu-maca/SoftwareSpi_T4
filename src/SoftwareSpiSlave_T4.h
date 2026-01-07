@@ -14,7 +14,6 @@ enum class SpiMode : byte
 class SoftwareSpiSlave
 {
 private:
-  const byte mode_;
   byte sdi_pin_;
   byte sdo_pin_;
   byte sck_pin_;
