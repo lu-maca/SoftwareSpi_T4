@@ -10,9 +10,9 @@ static SoftwareSpiSlave spiSlave{SpiMode::_3};
 // forward declaratin of the ISR
 static void slave_isr();
 
-const byte BUF_LEN = 8;
+const byte BUF_LEN = 18;
 uint8_t slave_tx_buf[BUF_LEN] = {
-    0xF0, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0xF1
+  0x0, 0x0, 0x0, 0x1, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0xf, 0x80
 };
 
 uint8_t rx_buf[BUF_LEN];
@@ -41,7 +41,7 @@ static void slave_isr() {
   }
 
   Serial.print("Received: ");
-  for (int j = 0; j < 8; j++) {
+  for (int j = 0; j < BUF_LEN; j++) {
     Serial.print(" ");
     Serial.print(rx_buf[j], HEX);
   }

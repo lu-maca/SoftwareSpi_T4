@@ -8,16 +8,15 @@ In slave mode, I tried running it up to 4 Mbps and still works fine.
 Master mode is not tested yet, but I'm quite confident it works. 
 
 # Features
-* supports master mode, with multiple slave devices
-* supports slave mode, by emulating multiple slaves on a single SPI bus
-* supports SPI mode 0 only (CPOL=0, CPHA=0)
+* supports master mode, with multiple slave devices (supports SPI mode 0 only)
+* supports slave mode, by emulating multiple slaves on a single SPI bus (supports all SPI modes)
 * supports 8 bits messages only (no 16/32 bits)
 
 # How to install
 Download the repository and follow the instructions [here](https://docs.arduino.cc/software/ide-v1/tutorials/installing-libraries/#importing-a-zip-library).
 
 # To do
-* add support for other SPI modes
+* add support for other SPI modes for SPI master
 * add support for other transmission sizes
 
 # SPI Logic
